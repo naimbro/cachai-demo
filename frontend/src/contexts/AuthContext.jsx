@@ -10,6 +10,8 @@ const ALLOWED_EMAILS = [
   'andabek@gmail.com',
   'naim.bro@gmail.com',
   'sytoro@gmail.com',
+  'lunapuljak@gmail.com',
+  'donrafa@gmail.com',
 ];
 
 export function AuthProvider({ children }) {
