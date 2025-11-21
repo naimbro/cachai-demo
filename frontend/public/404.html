@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <script>
+      // Single Page App redirect for GitHub Pages
+      // Converts path to query string and redirects to index
+      const path = window.location.pathname;
+      const search = window.location.search;
+      const hash = window.location.hash;
+      window.location.replace(
+        window.location.origin + '/cachai-demo/?redirect=' +
+        encodeURIComponent(path + search + hash)
+      );
+    </script>
+  </head>
+  <body>
+    Redirecting...
+  </body>
+</html>

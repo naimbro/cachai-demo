@@ -6,6 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Demo Parlamentario Chile</title>
     <meta name="description" content="Demo de Digital Twin y Predicción de Votos para el Congreso de Chile" />
+    <!-- GitHub Pages SPA redirect handler -->
+    <script>
+      (function() {
+        const redirect = new URLSearchParams(window.location.search).get('redirect');
+        if (redirect) {
+          window.history.replaceState(null, '', decodeURIComponent(redirect));
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
