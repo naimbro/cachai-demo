@@ -1,0 +1,866 @@
+{
+  "partidos": {
+    "Partido Liberal de Chile": {
+      "sigla": "PL",
+      "miembros": 3,
+      "cohesion": 0.85
+    },
+    "Partido Nacional Cristiano": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Radical Socialdemócrata": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Unión Social Republicana de Asalariados de Chile": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Conservador Unido": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Unión Demócrata Independiente": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Acción Nacional": {
+      "sigla": "AN",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Agrario Laborista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Democrático del Pueblo": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Progresista Nacional": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Institucional": {
+      "sigla": "Institucional",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Falange Nacional": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Conservador Social Cristiano": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Unión Socialista Popular": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Nacional o Monttvarista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Renovación Nacional": {
+      "sigla": "RN",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Vanguardia Popular Socialista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Movimiento Democrático Popular": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Radical Socialista": {
+      "sigla": "PRS",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Comunista de Chile": {
+      "sigla": "PC",
+      "miembros": 9,
+      "cohesion": 0.85
+    },
+    "Partido Liberal": {
+      "sigla": "PL",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Movimiento de Unión Nacional": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Socialista de Chile": {
+      "sigla": "PS",
+      "miembros": 12,
+      "cohesion": 0.85
+    },
+    "Partido Democrático": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Unión Demócrata Independiente": {
+      "sigla": "UDI",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Liberal Democrático o Balmacedista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Nacional": {
+      "sigla": "PN",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Demócrata Cristiano": {
+      "sigla": "DC",
+      "miembros": 3,
+      "cohesion": 0.85
+    },
+    "Partido Conservador": {
+      "sigla": null,
+      "miembros": 1,
+      "cohesion": 0.85
+    },
+    "Partido Radical": {
+      "sigla": "PR",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Poder": {
+      "sigla": "PP",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Federación Regionalista Verde Social": {
+      "sigla": "FREVS",
+      "miembros": 1,
+      "cohesion": 0.85
+    },
+    "Partido Unión Republicana": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Amplitud": {
+      "sigla": "AMPL",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Acción Nacional": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Izquierda Ciudadana de Chile": {
+      "sigla": "IC",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Ecologista Verde": {
+      "sigla": "PEV",
+      "miembros": 1,
+      "cohesion": 0.85
+    },
+    "Partido Nacional Democrático": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Alianza Nacional de los Independientes": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Fuerza Regional Independiente": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Revolución Democrática": {
+      "sigla": "REVD",
+      "miembros": 3,
+      "cohesion": 0.85
+    },
+    "Alianza por Chile": {
+      "sigla": "AC",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Independiente": {
+      "sigla": "IND",
+      "miembros": 31,
+      "cohesion": 0.85
+    },
+    "Partido del Sur": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "O'Higginistas": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Alianza Popular": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Democracia Agrario Laborista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Agrario Laborista Recuperacionista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Falange Radical Agrario Socialista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Alianza de Centro": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Avanzada Nacional": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Nueva Acción Pública": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Bloque Socialista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Socialista Unificado": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Nacional 1956": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Movimiento Nacionalista de Chile": {
+      "sigla": "MNC",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Liberal Democrático (1876)": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Acción Revolucionaria Socialista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Cívico Femenino": {
+      "sigla": "PCF",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Federalistas": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Alianza Democrática de Chile": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Amplio de Izquierda Socialista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Confederación de la democracia": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Unión Socialista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Socialista de Trabajadores": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Progresista": {
+      "sigla": "PRO",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Ecologista Verde de Chile": {
+      "sigla": "PEV",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido del Trabajo": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Chile Limpio. Vote Feliz": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Exaltados": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Moderados": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Pipiolos": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "País Progresista": {
+      "sigla": "PAPR",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Demócrata Nacionalista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Movimiento Amplio Social": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Alianza Democrática": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Los Verdes": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "ChilePrimero": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Juntos Podemos Más": {
+      "sigla": "MAS",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Liberal Progresista": {
+      "sigla": "PLP",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Evolución Política": {
+      "sigla": "EVOP",
+      "miembros": 1,
+      "cohesion": 0.85
+    },
+    "Partido Radical Socialista Obrero": {
+      "sigla": "PRSO",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Humanista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Concertación de Partidos por la Democracia": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Unión de Centro-Centro Progresista": {
+      "sigla": "UCCP",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Radical Social Demócrata": {
+      "sigla": "PRSD",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Carreristas": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Radical Democrático": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Estanqueros": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Realistas": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Unión Social Republicana de los Asalariados de Chile (USRACH)": {
+      "sigla": "USRACH",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Frente Amplio": {
+      "sigla": "FA",
+      "miembros": 1,
+      "cohesion": 0.85
+    },
+    "La Nueva Izquierda": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Agrario": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Movimiento Nacional Socialista de Chile": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Alianza Humanista Verde": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Acción Popular Independiente": {
+      "sigla": "API",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Progresista Femenino": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Democracia Radical": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Bloque de saneamiento democrático": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Acción Republicana": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Ecologista de Chile": {
+      "sigla": "PEV",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Liberal Unido": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Frente del Pueblo": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Socialista Auténtico": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Alianza de partidos y fuerzas populares": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Movimiento de Acción Popular Unitario": {
+      "sigla": "MAPU",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Social Republicano": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Vanguardia Nacional del Pueblo": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Comandos Populares": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Radical Doctrinario": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Femenino de Chile": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Socialista Popular": {
+      "sigla": "PSP",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Nueva Mayoría para Chile": {
+      "sigla": "NM",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Confederación Republicana de Acción Cívica de Obreros y Empleados (CORA)": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Movimiento Nacional del Pueblo": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Regionalista de los Independientes": {
+      "sigla": "PRI",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Coalición por el Cambio": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Conservador Tradicionalista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Izquierda Cristiana": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Democrático Nacional": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Unión de Centro-Centro": {
+      "sigla": "UCC",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Pelucones": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Izquierda Radical": {
+      "sigla": "PIR",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Democrático de Chile": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Social Demócrata": {
+      "sigla": "PSD",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Acción Renovadora de Chile": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Obrero Socialista": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Nacional Popular": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Social Democracia de Chile": {
+      "sigla": "PSDC",
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Alianza Popular Libertadora": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Por la Democracia": {
+      "sigla": "PPD",
+      "miembros": 3,
+      "cohesion": 0.85
+    },
+    "Partido Republicano de Chile": {
+      "sigla": null,
+      "miembros": 13,
+      "cohesion": 0.85
+    },
+    "Partido Convergencia Social": {
+      "sigla": null,
+      "miembros": 1,
+      "cohesion": 0.85
+    },
+    "Partido Democratas Chile": {
+      "sigla": null,
+      "miembros": 4,
+      "cohesion": 0.85
+    },
+    "Movimiento Amarillos por Chile": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Union Democrata Independiente": {
+      "sigla": null,
+      "miembros": 16,
+      "cohesion": 0.85
+    },
+    "Partido Democrata Cristiano": {
+      "sigla": null,
+      "miembros": 3,
+      "cohesion": 0.85
+    },
+    "Partido Social Cristiano": {
+      "sigla": null,
+      "miembros": 4,
+      "cohesion": 0.85
+    },
+    "Partido Renovacion Nacional": {
+      "sigla": null,
+      "miembros": 19,
+      "cohesion": 0.85
+    },
+    "Partido Frente Amplio": {
+      "sigla": null,
+      "miembros": 13,
+      "cohesion": 0.85
+    },
+    "Partido Nacional Libertario": {
+      "sigla": null,
+      "miembros": 6,
+      "cohesion": 0.85
+    },
+    "Evopoli": {
+      "sigla": null,
+      "miembros": 1,
+      "cohesion": 0.85
+    },
+    "Partido de la Gente": {
+      "sigla": null,
+      "miembros": 2,
+      "cohesion": 0.85
+    },
+    "Partido Radical Socialdemocrata": {
+      "sigla": null,
+      "miembros": 2,
+      "cohesion": 0.85
+    },
+    "Federacion Regionalista Verde Social": {
+      "sigla": null,
+      "miembros": 1,
+      "cohesion": 0.85
+    },
+    "Partido Liberal Democratico": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Partido Democratico de Chile": {
+      "sigla": null,
+      "miembros": 0,
+      "cohesion": 0.85
+    },
+    "Acción Humanista": {
+      "sigla": null,
+      "miembros": 1,
+      "cohesion": 0.85
+    },
+    "Acción por Chile": {
+      "sigla": null,
+      "miembros": 1,
+      "cohesion": 0.85
+    },
+    "Demócratas": {
+      "sigla": null,
+      "miembros": 1,
+      "cohesion": 0.85
+    }
+  },
+  "materias": [
+    "\"IUS VARIANDI\"",
+    "A.F.P. ESTATAL",
+    "ABANDONO DE ANIMALES",
+    "ABANDONO DE FAENAS SIN CAUSA JUSTIFICADA",
+    "ABANDONO DE FAMILIA",
+    "ABANDONO DE MENORES",
+    "ABANDONO DE RECIÉN NACIDOS",
+    "ABANDONO DEL ADULTO MAYOR",
+    "ABANDONO DEL HOGAR",
+    "ABASTECIMIENTO DE AGUA",
+    "ABASTECIMIENTO RESIDENCIAL DE GAS",
+    "ABEJAS",
+    "ABIGEATO",
+    "ABOGADO INTEGRANTE DE LA CORTE SUPREMA",
+    "ABOGADO INTEGRANTE DE LAS CORTES DE APELACIONES",
+    "ABOGADOS",
+    "ABOGADOS INTEGRANTES",
+    "ABONO AL PAGO MÍNIMO",
+    "ABONOS BANCARIOS",
+    "ABORTO",
+    "ABORTO TERAPEUTICO",
+    "ABSOLENCIA PROGRAMADA",
+    "ABSOLUCIÓN DE POSICIONES",
+    "ABSTENCIÓN DE AUTORIDADES Y FUNCIONARIOS",
+    "ABUSO DE DERECHO",
+    "ABUSO DE DROGAS",
+    "ABUSO DE LA CREDULIDAD POPULAR",
+    "ABUSO PATRIMONIAL",
+    "ABUSO SEXUAL",
+    "ABUSO SEXUAL INFANTIL",
+    "ABUSOS DE PUBLICIDAD",
+    "ABUSOS DESHONESTOS",
+    "ACADEMIA DIPLOMÁTICA",
+    "ACADEMIA JUDICIAL",
+    "ACAPARAMIENTO Y ESPECULACIÓN",
+    "ACCESIBILIDAD VIAL",
+    "ACCESO A CRÉDITO",
+    "ACCESO A INFORMACIÓN DE ONEMI",
+    "ACCESO A INTERNET",
+    "ACCESO A LA EDUCACIÓN",
+    "ACCESO A LA EDUCACIÓN A PERSONAS DISCAPACITADAS",
+    "ACCESO A LA INFORMACION",
+    "ACCESO A LA INFORMACION BANCARIA",
+    "ACCESO A LA INFORMACION FINANCIERA DEL EMPLEADOR",
+    "ACCESO A LA INFORMACION PUBLICA",
+    "ACCESO A PERSONAS CON DISCAPACIDAD",
+    "ACCESO A PLAYAS, LAGOS, RIOS",
+    "ACCESO AL AGUA",
+    "ACCESO AL EMPLEO DE PERSONAS CON DISCAPACIDAD",
+    "ACCESO AL SERVICIO PÚBLICO TELEFÓNICO",
+    "ACCESO BIBLIOTECAS",
+    "ACCESO GRATUITO",
+    "ACCESO JUDICIAL A INFORMACIÓN TRIBUTARIA",
+    "ACCESO UNIVERSAL DE LAS TECNOLOGÍAS DE INFORMACIÓN Y COMUNICACIÓN",
+    "ACCESO Y USO DE AGUA",
+    "ACCIDENTES AÉREOS",
+    "ACCIDENTES CAUSADOS POR PEATONES",
+    "ACCIDENTES DE TRABAJO",
+    "ACCIDENTES DE TRANSITO",
+    "ACCIDENTES PERSONALES",
+    "ACCIDENTES POR RADIACIÓN",
+    "ACCION CIVIL",
+    "ACCION DISCIPLINARIA",
+    "ACCION POPULAR",
+    "ACCIONES (BOLSA)",
+    "ACCIONES COLECTIVAS (DERECHO PROCESAL CIVIL)",
+    "ACCIONES CONSTITUCIONALES",
+    "ACCIONES EDUCATIVAS",
+    "ACCIONES PROCESALES",
+    "ACCIONES PROSELITISTAS",
+    "ACCIONES VINCULADAS A LA ATENCIÓN EN SALUD",
+    "ACCIONISTA DISIDENTE",
+    "ACCIONISTAS",
+    "ACCIÓN DE INAPLICABILIDAD",
+    "ACCIÓN DE NULIDAD DE DERECHO PÚBLICO",
+    "ACCIÓN MUNICIPAL",
+    "ACCIÓN PENAL",
+    "ACCIÓN PENAL PRIVADA",
+    "ACCIÓN PENAL PÚBLICA",
+    "ACEITE DE OLIVA",
+    "ACEITE DE ORUJO DE OLIVA",
+    "ACEITE DE PALMA",
+    "ACEITES Y GRASAS COMESTIBLES",
+    "ACEPTACIONES (INSTRUMENTOS DE CRÉDITO)",
+    "ACOMPAÑAMIENTO EFECTIVO",
+    "ACOSO COMERCIAL",
+    "ACOSO ESCOLAR",
+    "ACOSO LABORAL",
+    "ACOSO MORAL",
+    "ACOSO SEXUAL",
+    "ACOSO SEXUAL EN ATENCION DE SALUD",
+    "ACOSO SEXUAL EN EL DEPORTE",
+    "ACOSO SEXUAL EN PÚBLICO",
+    "ACOSO TELEFONICO",
+    "ACREDITACION DE DOMINIO",
+    "ACREDITACION MENTAL",
+    "ACREDITACIÓN",
+    "ACREDITACIÓN DE DOMICILIO",
+    "ACREDITACIÓN DE INSTITUCIONES DE EDUCACION SUPERIOR",
+    "ACREDITACIÓN DE PAGOS TAG O TELEVÍA"
+  ],
+  "stats": {
+    "total_parlamentarios": 157,
+    "total_bills": 2535,
+    "periodo": "2022-2026"
+  }
+}

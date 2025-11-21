@@ -1,0 +1,35 @@
+// Firestore Security Rules for Diputados Demo
+// These rules are for reference - actual rules should be set in Firebase Console
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Public read access for all parliament data
+    match /diputados/{document=**} {
+      allow read: if true;
+      allow write: if false; // Admin only via Firebase Console
+    }
+
+    match /bills/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /embeddings/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /metadata/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Analytics/logging (optional)
+    match /queries/{document=**} {
+      allow read: if false;
+      allow write: if true; // Allow anonymous query logging
+    }
+  }
+}

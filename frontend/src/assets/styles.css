@@ -1,0 +1,241 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans antialiased bg-dark-900 text-slate-100;
+  }
+
+  ::selection {
+    @apply bg-primary-500/30 text-white;
+  }
+}
+
+@layer components {
+  /* Glass Cards */
+  .glass-card {
+    @apply bg-dark-800/50 backdrop-blur-xl
+           border border-white/5
+           rounded-2xl
+           shadow-glass;
+  }
+
+  .glass-card-hover {
+    @apply glass-card
+           transition-all duration-300 ease-out
+           hover:bg-dark-700/50
+           hover:border-white/10
+           hover:-translate-y-1
+           hover:shadow-glow;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply px-6 py-3
+           bg-primary-600 text-white font-medium
+           rounded-xl
+           transition-all duration-200 ease-out
+           hover:bg-primary-500 hover:scale-[1.02]
+           active:scale-[0.98]
+           focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:ring-offset-2 focus:ring-offset-dark-900;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3
+           bg-dark-700 text-slate-200 font-medium
+           border border-dark-600
+           rounded-xl
+           transition-all duration-200 ease-out
+           hover:bg-dark-600 hover:border-dark-500
+           active:scale-[0.98]
+           focus:outline-none focus:ring-2 focus:ring-slate-500/50;
+  }
+
+  .btn-ghost {
+    @apply px-4 py-2
+           text-slate-400 font-medium
+           rounded-lg
+           transition-all duration-200
+           hover:text-slate-200 hover:bg-white/5;
+  }
+
+  /* Input Fields */
+  .input-field {
+    @apply w-full px-4 py-3
+           bg-dark-800/50 text-slate-100
+           border border-dark-600
+           rounded-xl
+           placeholder:text-slate-500
+           transition-all duration-200
+           focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20
+           focus:outline-none;
+  }
+
+  .input-field-lg {
+    @apply input-field text-lg py-4;
+  }
+
+  /* Chat Bubbles */
+  .chat-bubble-user {
+    @apply bg-primary-600 text-white
+           rounded-2xl rounded-br-md
+           px-4 py-3
+           shadow-lg shadow-primary-900/20;
+  }
+
+  .chat-bubble-ai {
+    @apply bg-dark-700 text-slate-100
+           border border-dark-600
+           rounded-2xl rounded-bl-md
+           px-4 py-3;
+  }
+
+  /* Bento Grid */
+  .bento-grid {
+    @apply grid gap-4;
+  }
+
+  .bento-item {
+    @apply glass-card p-6;
+  }
+
+  .bento-item-lg {
+    @apply bento-item md:col-span-2 md:row-span-2;
+  }
+
+  /* Tags/Badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5
+           rounded-full text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply badge bg-primary-500/20 text-primary-300 border border-primary-500/30;
+  }
+
+  .badge-success {
+    @apply badge bg-vote-favor/20 text-emerald-300 border border-vote-favor/30;
+  }
+
+  .badge-danger {
+    @apply badge bg-vote-contra/20 text-red-300 border border-vote-contra/30;
+  }
+
+  .badge-warning {
+    @apply badge bg-vote-abstencion/20 text-amber-300 border border-vote-abstencion/30;
+  }
+
+  .badge-neutral {
+    @apply badge bg-slate-500/20 text-slate-300 border border-slate-500/30;
+  }
+
+  /* Stats */
+  .stat-value {
+    @apply text-4xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent;
+  }
+
+  .stat-label {
+    @apply text-sm text-slate-400 mt-1;
+  }
+
+  /* Navigation */
+  .nav-link {
+    @apply px-4 py-2
+           text-slate-400 font-medium text-sm
+           rounded-lg
+           transition-all duration-200
+           hover:text-slate-100 hover:bg-white/5;
+  }
+
+  .nav-link-active {
+    @apply nav-link text-slate-100 bg-white/10;
+  }
+
+  /* Glow effects */
+  .glow-border {
+    @apply relative;
+  }
+
+  .glow-border::before {
+    content: '';
+    @apply absolute -inset-[1px]
+           bg-gradient-to-r from-primary-500/50 to-accent-500/50
+           rounded-2xl blur-sm opacity-0
+           transition-opacity duration-300;
+  }
+
+  .glow-border:hover::before {
+    @apply opacity-100;
+  }
+}
+
+@layer utilities {
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-400 via-accent-400 to-primary-400
+           bg-clip-text text-transparent;
+  }
+
+  /* Scrollbar styling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.dark.600') transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: theme('colors.dark.600');
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.dark.500');
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Loading animation */
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: ''; }
+  40% { content: '.'; }
+  60% { content: '..'; }
+  80%, 100% { content: '...'; }
+}
+
+/* Skeleton loading */
+.skeleton {
+  @apply bg-dark-700 animate-pulse rounded;
+}
+
+/* Focus visible only on keyboard navigation */
+.focus-visible-only:focus {
+  outline: none;
+}
+
+.focus-visible-only:focus-visible {
+  @apply ring-2 ring-primary-500/50 ring-offset-2 ring-offset-dark-900;
+}
