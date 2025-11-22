@@ -129,44 +129,60 @@ function DigitalTwinChat({ parlamentario, onClose, isMobile }) {
           <div key={idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
             <div className={`max-w-[80%] ${msg.type === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`}>
               <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-              {/* Show relevant bills */}
-              {msg.references && msg.references.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-white/10">
-                  <p className="text-xs font-medium text-slate-400 mb-3 flex items-center">
-                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Proyectos relevantes
-                  </p>
-                  <div className="space-y-3">
-                    {msg.references.map((ref, i) => (
-                      <div key={i} className="bg-dark-700/50 rounded-lg p-2">
-                        <div className="flex items-start space-x-2 text-sm">
-                          <span className="w-1.5 h-1.5 bg-primary-400 rounded-full flex-shrink-0 mt-1.5" />
-                          <div className="flex-1 min-w-0">
-                            <span className="text-slate-300 block">{ref.titulo}</span>
-                            <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              <span className="badge-primary text-xs">{Math.round(ref.relevancia * 100)}%</span>
-                              {ref.estado && (
-                                <span className="text-xs text-slate-500">{ref.estado}</span>
-                              )}
-                              {ref.voto && (
-                                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                  ref.voto === 'a favor' ? 'bg-emerald-500/20 text-emerald-400' :
-                                  ref.voto === 'en contra' ? 'bg-red-500/20 text-red-400' :
-                                  'bg-yellow-500/20 text-yellow-400'
-                                }`}>
-                                  Voto: {ref.voto}
-                                </span>
-                              )}
+              {/* Show relevant bills only if similarity > 50% */}
+              {msg.references && msg.references.length > 0 && (() => {
+                const highRelevanceRefs = msg.references.filter(ref => ref.relevancia > 0.5)
+                if (highRelevanceRefs.length > 0) {
+                  return (
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                      <p className="text-xs font-medium text-slate-400 mb-3 flex items-center">
+                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Proyectos relevantes
+                      </p>
+                      <div className="space-y-3">
+                        {highRelevanceRefs.map((ref, i) => (
+                          <div key={i} className="bg-dark-700/50 rounded-lg p-2">
+                            <div className="flex items-start space-x-2 text-sm">
+                              <span className="w-1.5 h-1.5 bg-primary-400 rounded-full flex-shrink-0 mt-1.5" />
+                              <div className="flex-1 min-w-0">
+                                <span className="text-slate-300 block">{ref.titulo}</span>
+                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                  <span className="badge-primary text-xs">{Math.round(ref.relevancia * 100)}%</span>
+                                  {ref.estado && (
+                                    <span className="text-xs text-slate-500">{ref.estado}</span>
+                                  )}
+                                  {ref.voto && (
+                                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                      ref.voto === 'a favor' ? 'bg-emerald-500/20 text-emerald-400' :
+                                      ref.voto === 'en contra' ? 'bg-red-500/20 text-red-400' :
+                                      'bg-yellow-500/20 text-yellow-400'
+                                    }`}>
+                                      Voto: {ref.voto}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                    </div>
+                  )
+                } else {
+                  return (
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                      <p className="text-xs text-slate-500 italic flex items-center">
+                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Redirige la conversacion hacia temas cubiertos por los proyectos de ley de este ciclo legislativo.
+                      </p>
+                    </div>
+                  )
+                }
+              })()}
               {/* Show suggested voted topics when no votes on similar bills */}
               {msg.temasVotados && msg.temasVotados.length > 0 && !msg.hasVotedOnSimilar && (
                 <div className="mt-4 pt-4 border-t border-white/10">
