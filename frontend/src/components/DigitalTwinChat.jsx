@@ -36,11 +36,17 @@ function DigitalTwinChat({ parlamentario, onClose, isMobile }) {
 
     const userMessage = input.trim()
     setInput('')
+
+    // Build conversation history for context (exclude welcome message)
+    const conversationHistory = messages
+      .filter(m => m.type === 'user' || (m.type === 'ai' && messages.indexOf(m) > 0))
+      .map(m => ({ type: m.type, content: m.content }))
+
     setMessages(prev => [...prev, { type: 'user', content: userMessage }])
     setIsLoading(true)
 
     try {
-      const data = await digitalTwinQuery(parlamentario.id, userMessage)
+      const data = await digitalTwinQuery(parlamentario.id, userMessage, conversationHistory)
       setMessages(prev => [...prev, {
         type: 'ai',
         content: data.respuesta,
@@ -129,12 +135,30 @@ function DigitalTwinChat({ parlamentario, onClose, isMobile }) {
                     </svg>
                     Proyectos relevantes
                   </p>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {msg.references.map((ref, i) => (
-                      <div key={i} className="flex items-center space-x-2 text-sm">
-                        <span className="w-1.5 h-1.5 bg-primary-400 rounded-full flex-shrink-0" />
-                        <span className="text-slate-300 flex-1 truncate">{ref.titulo}</span>
-                        <span className="badge-primary text-xs">{Math.round(ref.relevancia * 100)}%</span>
+                      <div key={i} className="bg-dark-700/50 rounded-lg p-2">
+                        <div className="flex items-start space-x-2 text-sm">
+                          <span className="w-1.5 h-1.5 bg-primary-400 rounded-full flex-shrink-0 mt-1.5" />
+                          <div className="flex-1 min-w-0">
+                            <span className="text-slate-300 block">{ref.titulo}</span>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <span className="badge-primary text-xs">{Math.round(ref.relevancia * 100)}%</span>
+                              {ref.estado && (
+                                <span className="text-xs text-slate-500">{ref.estado}</span>
+                              )}
+                              {ref.voto && (
+                                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                  ref.voto === 'a favor' ? 'bg-emerald-500/20 text-emerald-400' :
+                                  ref.voto === 'en contra' ? 'bg-red-500/20 text-red-400' :
+                                  'bg-yellow-500/20 text-yellow-400'
+                                }`}>
+                                  Voto: {ref.voto}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>

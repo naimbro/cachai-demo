@@ -11,9 +11,6 @@ let metadata;
 // Transformers.js pipeline (cached)
 let embeddingPipeline = null;
 
-// Environment variables
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
-
 function initializeData() {
   if (!diputados) {
     diputados = require('./parliamentdata/diputados.json');
@@ -24,9 +21,10 @@ function initializeData() {
 }
 
 function getOpenAI() {
-  if (!openai && OPENAI_API_KEY) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!openai && apiKey) {
     OpenAI = require('openai').OpenAI;
-    openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+    openai = new OpenAI({ apiKey });
   }
   return openai;
 }
@@ -192,9 +190,9 @@ exports.getParlamentario = onRequest({ cors: true }, async (req, res) => {
 });
 
 /**
- * Digital Twin Query
+ * Digital Twin Query - with conversation history and voting info
  */
-exports.digitalTwinQuery = onRequest({ cors: true }, async (req, res) => {
+exports.digitalTwinQuery = onRequest({ cors: true, secrets: ['OPENAI_API_KEY'] }, async (req, res) => {
   initializeData();
 
   if (req.method !== 'POST') {
@@ -202,7 +200,7 @@ exports.digitalTwinQuery = onRequest({ cors: true }, async (req, res) => {
   }
 
   try {
-    const { parlamentarioId, pregunta } = req.body;
+    const { parlamentarioId, pregunta, conversationHistory = [] } = req.body;
 
     if (!parlamentarioId || !pregunta) {
       return res.status(400).json({ error: 'Missing parlamentarioId or pregunta' });
@@ -220,31 +218,64 @@ exports.digitalTwinQuery = onRequest({ cors: true }, async (req, res) => {
     // Build context
     const context = buildParlamentarioContext(parlamentario);
 
-    // Add relevant bills context
-    const billsContext = similarBills.slice(0, 3).map(b =>
-      `- ${b.titulo} (${b.estado})`,
-    ).join('\n');
+    // Look up parlamentario's votes on similar bills
+    const recentVotes = parlamentario.votaciones_recientes || [];
+    const billsWithVotes = similarBills.slice(0, 3).map(bill => {
+      const vote = recentVotes.find(v => v.bill_id === bill.id);
+      return {
+        id: bill.id,
+        titulo: bill.titulo,
+        estado: bill.estado,
+        fecha: bill.fecha,
+        relevancia: Math.round(bill.similitud * 100) / 100,
+        voto: vote ? vote.voto : null,
+        fechaVoto: vote ? vote.fecha : null,
+      };
+    });
+
+    // Add relevant bills context with vote info
+    const billsContext = billsWithVotes.map(b => {
+      const voteInfo = b.voto ? ` - Vote: ${b.voto}` : '';
+      return `- ${b.titulo} (${b.estado})${voteInfo}`;
+    }).join('\n');
 
     let respuesta;
 
     try {
       const client = getOpenAI();
       if (client) {
-        const completion = await client.chat.completions.create({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: `Eres el gemelo digital de ${parlamentario.nombre}, diputado/a del ${parlamentario.partido} en Chile.
+        // Build messages array with conversation history
+        const messages = [
+          {
+            role: 'system',
+            content: `Eres el gemelo digital de ${parlamentario.nombre}, diputado/a del ${parlamentario.partido} en Chile.
 Responde en primera persona, de manera conversacional pero informada.
 Basa tus respuestas en tu historial de votaciones y posiciones politicas.
-Se coherente con tu perfil partidario y tu historial de votaciones.`,
-            },
-            {
-              role: 'user',
-              content: `Mi perfil y contexto:\n${context}\n\nProyectos relacionados con la pregunta:\n${billsContext}\n\nPregunta del ciudadano: ${pregunta}`,
-            },
-          ],
+Se coherente con tu perfil partidario y tu historial de votaciones.
+
+Tu perfil y contexto:
+${context}`,
+          },
+        ];
+
+        // Add conversation history (limit to last 10 exchanges to avoid token limits)
+        const recentHistory = conversationHistory.slice(-10);
+        for (const msg of recentHistory) {
+          messages.push({
+            role: msg.type === 'user' ? 'user' : 'assistant',
+            content: msg.content,
+          });
+        }
+
+        // Add current question with context
+        messages.push({
+          role: 'user',
+          content: `Proyectos de ley relacionados con mi pregunta:\n${billsContext}\n\nMi pregunta: ${pregunta}`,
+        });
+
+        const completion = await client.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages,
           max_tokens: 600,
           temperature: 0.7,
         });
@@ -262,10 +293,7 @@ Se coherente con tu perfil partidario y tu historial de votaciones.`,
 
     return res.json({
       respuesta,
-      referencias: similarBills.slice(0, 3).map(b => ({
-        titulo: b.titulo,
-        relevancia: Math.round(b.similitud * 100) / 100,
-      })),
+      referencias: billsWithVotes,
     });
 
   } catch (error) {
@@ -436,7 +464,7 @@ exports.healthCheck = onRequest({ cors: true }, (req, res) => {
       embeddings: embeddings.length,
     },
     config: {
-      openai: !!OPENAI_API_KEY,
+      openai: 'configured via secret',
       embeddings: 'transformers.js (all-MiniLM-L6-v2)',
     },
   });

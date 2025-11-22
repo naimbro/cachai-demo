@@ -50,12 +50,13 @@ export async function getParlamentario(id) {
  * Query the digital twin
  * @param {number} parlamentarioId - Parlamentario ID
  * @param {string} pregunta - Question to ask
+ * @param {Array} conversationHistory - Previous messages for context
  * @returns {Promise<{respuesta: string, referencias: Array}>}
  */
-export async function digitalTwinQuery(parlamentarioId, pregunta) {
+export async function digitalTwinQuery(parlamentarioId, pregunta, conversationHistory = []) {
   return fetchAPI('digitalTwinQuery', {
     method: 'POST',
-    body: JSON.stringify({ parlamentarioId, pregunta }),
+    body: JSON.stringify({ parlamentarioId, pregunta, conversationHistory }),
   });
 }
 
