@@ -190,9 +190,14 @@ exports.getParlamentario = onRequest({ cors: true }, async (req, res) => {
 });
 
 /**
- * Digital Twin Query - with conversation history and voting info
+ * Digital Twin Query - with conversation history, voting info, and topic redirection
  */
-exports.digitalTwinQuery = onRequest({ cors: true, secrets: ['OPENAI_API_KEY'] }, async (req, res) => {
+exports.digitalTwinQuery = onRequest({
+  cors: true,
+  secrets: ['OPENAI_API_KEY'],
+  memory: '1GiB',
+  timeoutSeconds: 120,
+}, async (req, res) => {
   initializeData();
 
   if (req.method !== 'POST') {
@@ -211,15 +216,17 @@ exports.digitalTwinQuery = onRequest({ cors: true, secrets: ['OPENAI_API_KEY'] }
       return res.status(404).json({ error: 'Parlamentario not found' });
     }
 
+    // Get parlamentario's voting history
+    const recentVotes = parlamentario.votaciones_recientes || [];
+
     // Find similar bills to the question
     const queryEmbedding = await getEmbedding(pregunta);
     const similarBills = findSimilarBills(queryEmbedding, 5);
 
-    // Build context
-    const context = buildParlamentarioContext(parlamentario);
+    // Check similarity threshold - if no relevant bills found
+    const hasRelevantBills = similarBills.length > 0 && similarBills[0].similitud > 0.3;
 
     // Look up parlamentario's votes on similar bills
-    const recentVotes = parlamentario.votaciones_recientes || [];
     const billsWithVotes = similarBills.slice(0, 3).map(bill => {
       const vote = recentVotes.find(v => v.bill_id === bill.id);
       return {
@@ -233,32 +240,73 @@ exports.digitalTwinQuery = onRequest({ cors: true, secrets: ['OPENAI_API_KEY'] }
       };
     });
 
-    // Add relevant bills context with vote info
-    const billsContext = billsWithVotes.map(b => {
-      const voteInfo = b.voto ? ` - Vote: ${b.voto}` : '';
-      return `- ${b.titulo} (${b.estado})${voteInfo}`;
-    }).join('\n');
+    // Check if parlamentario voted on any similar bill
+    const hasVotedOnSimilar = billsWithVotes.some(b => b.voto !== null);
+
+    // Get sample of bills where parlamentario DID vote (for topic suggestions)
+    const votedBillsSample = recentVotes
+      .filter(v => v.voto && v.voto !== 'no vota')
+      .slice(0, 6)
+      .map(v => ({
+        titulo: v.titulo,
+        voto: v.voto,
+        fecha: v.fecha,
+      }));
+
+    // Build context
+    const context = buildParlamentarioContext(parlamentario);
+
+    // Build bills context for the prompt
+    const billsContext = hasRelevantBills
+      ? billsWithVotes.map(b => {
+        const voteInfo = b.voto ? ` - MI VOTO: ${b.voto}` : ' - (en tramitacion, no he votado)';
+        return `- ${b.titulo} (${b.estado})${voteInfo}`;
+      }).join('\n')
+      : 'No se encontraron proyectos de ley directamente relacionados con esta consulta.';
+
+    // Build voted topics context
+    const votedTopicsContext = votedBillsSample.map(v =>
+      `- ${v.titulo} (vote ${v.voto})`,
+    ).join('\n');
 
     let respuesta;
 
     try {
       const client = getOpenAI();
       if (client) {
-        // Build messages array with conversation history
-        const messages = [
-          {
-            role: 'system',
-            content: `Eres el gemelo digital de ${parlamentario.nombre}, diputado/a del ${parlamentario.partido} en Chile.
+        // Build system prompt with conversation rules
+        const systemPrompt = `Eres el gemelo digital de ${parlamentario.nombre}, diputado/a del ${parlamentario.partido} en Chile.
 Responde en primera persona, de manera conversacional pero informada.
-Basa tus respuestas en tu historial de votaciones y posiciones politicas.
-Se coherente con tu perfil partidario y tu historial de votaciones.
 
 Tu perfil y contexto:
-${context}`,
-          },
-        ];
+${context}
 
-        // Add conversation history (limit to last 10 exchanges to avoid token limits)
+REGLAS DE CONVERSACION (MUY IMPORTANTES):
+
+1. SI hay proyectos relevantes donde YO VOTE (marcados con "MI VOTO"):
+   → Responde con tu posicion basada en como votaste, explicando tus razones.
+
+2. SI hay proyectos relevantes pero NO vote en ninguno (marcados como "en tramitacion"):
+   → Menciona que esos proyectos estan en tramitacion y aun no has formado una posicion oficial.
+   → Sugiere hablar sobre temas donde SI has votado.
+   → Pregunta al usuario si le interesa alguno de esos temas.
+
+3. SI no hay proyectos relevantes (saludos, preguntas generales):
+   → Responde de manera natural y amable.
+   → Presentate brevemente si es el inicio de la conversacion.
+   → Menciona algunos temas en los que has votado para guiar la conversacion.
+
+4. SI el usuario insiste en un tema donde no has votado:
+   → Mantén: "Aun no tengo una posicion oficial formada sobre esto."
+   → Puedes dar una opinion muy general basada en los valores de tu partido, pero deja claro que es especulativo.
+
+PROYECTOS EN LOS QUE HE VOTADO (usa estos para sugerir temas):
+${votedTopicsContext}`;
+
+        // Build messages array with conversation history
+        const messages = [{ role: 'system', content: systemPrompt }];
+
+        // Add conversation history (limit to last 10 exchanges)
         const recentHistory = conversationHistory.slice(-10);
         for (const msg of recentHistory) {
           messages.push({
@@ -268,15 +316,16 @@ ${context}`,
         }
 
         // Add current question with context
-        messages.push({
-          role: 'user',
-          content: `Proyectos de ley relacionados con mi pregunta:\n${billsContext}\n\nMi pregunta: ${pregunta}`,
-        });
+        const userMessage = hasRelevantBills
+          ? `Proyectos de ley relacionados con mi pregunta:\n${billsContext}\n\nMi pregunta: ${pregunta}`
+          : `Mi pregunta: ${pregunta}\n\n(Nota: No se encontraron proyectos de ley directamente relacionados con esta consulta)`;
+
+        messages.push({ role: 'user', content: userMessage });
 
         const completion = await client.chat.completions.create({
           model: 'gpt-4o-mini',
           messages,
-          max_tokens: 600,
+          max_tokens: 700,
           temperature: 0.7,
         });
         respuesta = completion.choices[0].message.content;
@@ -288,12 +337,14 @@ ${context}`,
       // Fallback response
       const stats = parlamentario.estadisticas_voto;
       const tendency = stats.a_favor > stats.en_contra ? 'favorable' : 'critica';
-      respuesta = `Como ${parlamentario.nombre} del ${parlamentario.partido}, mi posicion sobre este tema refleja mi trayectoria legislativa. Con ${stats.total} votaciones en mi historial, he mantenido una postura ${tendency} hacia iniciativas de este tipo. Mi compromiso es representar los intereses de mis electores y los valores de mi partido.`;
+      respuesta = `Como ${parlamentario.nombre} del ${parlamentario.partido}, mi posicion sobre este tema refleja mi trayectoria legislativa. Con ${stats.total} votaciones en mi historial, he mantenido una postura ${tendency} hacia iniciativas de este tipo.`;
     }
 
     return res.json({
       respuesta,
-      referencias: billsWithVotes,
+      referencias: hasRelevantBills ? billsWithVotes : [],
+      temasVotados: votedBillsSample.slice(0, 3),
+      hasVotedOnSimilar,
     });
 
   } catch (error) {

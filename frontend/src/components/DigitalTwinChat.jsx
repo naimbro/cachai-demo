@@ -50,7 +50,9 @@ function DigitalTwinChat({ parlamentario, onClose, isMobile }) {
       setMessages(prev => [...prev, {
         type: 'ai',
         content: data.respuesta,
-        references: data.referencias || []
+        references: data.referencias || [],
+        temasVotados: data.temasVotados || [],
+        hasVotedOnSimilar: data.hasVotedOnSimilar
       }])
     } catch (error) {
       console.error('Error:', error)
@@ -127,6 +129,7 @@ function DigitalTwinChat({ parlamentario, onClose, isMobile }) {
           <div key={idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
             <div className={`max-w-[80%] ${msg.type === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`}>
               <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+              {/* Show relevant bills */}
               {msg.references && msg.references.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-white/10">
                   <p className="text-xs font-medium text-slate-400 mb-3 flex items-center">
@@ -158,6 +161,38 @@ function DigitalTwinChat({ parlamentario, onClose, isMobile }) {
                               )}
                             </div>
                           </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Show suggested voted topics when no votes on similar bills */}
+              {msg.temasVotados && msg.temasVotados.length > 0 && !msg.hasVotedOnSimilar && (
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <p className="text-xs font-medium text-accent-400 mb-3 flex items-center">
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Temas en los que he votado
+                  </p>
+                  <div className="space-y-2">
+                    {msg.temasVotados.map((tema, i) => (
+                      <div key={i} className="flex items-start space-x-2 text-sm">
+                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${
+                          tema.voto === 'a favor' ? 'bg-emerald-400' :
+                          tema.voto === 'en contra' ? 'bg-red-400' :
+                          'bg-yellow-400'
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <span className="text-slate-300 block text-xs">{tema.titulo}</span>
+                          <span className={`text-xs ${
+                            tema.voto === 'a favor' ? 'text-emerald-400' :
+                            tema.voto === 'en contra' ? 'text-red-400' :
+                            'text-yellow-400'
+                          }`}>
+                            {tema.voto}
+                          </span>
                         </div>
                       </div>
                     ))}
