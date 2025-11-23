@@ -15,6 +15,7 @@ function Navbar() {
     { path: '/digital-twin', label: 'Digital Twin' },
     { path: '/predictor', label: 'Predictor' },
     { path: '/explorer', label: 'Explorer' },
+    { path: '/network', label: 'Network' },
   ]
 
   return (

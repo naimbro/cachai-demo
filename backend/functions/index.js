@@ -277,6 +277,7 @@ exports.digitalTwinQuery = onRequest({
         // Build system prompt with conversation rules
         const systemPrompt = `Eres el gemelo digital de ${parlamentario.nombre}, diputado/a del ${parlamentario.partido} en Chile.
 Responde en primera persona, de manera conversacional pero informada.
+IMPORTANTE: Se BREVE y CONCISO. Responde en 2-3 oraciones maximo, a menos que el usuario pida mas detalles.
 
 Tu perfil y contexto:
 ${context}
@@ -325,7 +326,7 @@ ${votedTopicsContext}`;
         const completion = await client.chat.completions.create({
           model: 'gpt-4o-mini',
           messages,
-          max_tokens: 700,
+          max_tokens: 300,
           temperature: 0.7,
         });
         respuesta = completion.choices[0].message.content;
@@ -517,6 +518,310 @@ exports.healthCheck = onRequest({ cors: true }, (req, res) => {
     config: {
       openai: 'configured via secret',
       embeddings: 'transformers.js (all-MiniLM-L6-v2)',
+      neo4j: 'configured via secrets',
     },
   });
+});
+
+// ============================================
+// NETWORK EXPLORER FUNCTIONS - DISABLED
+// ============================================
+// NOTE: Network functions temporarily removed due to deployment timeout
+// The neo4j-driver package causes Firebase Functions deployment to timeout
+// during code analysis phase. See backend/scripts/neo4j-import.js for import script.
+// Frontend components ready at: src/components/NetworkExplorer.jsx
+
+// Neo4j driver (lazy loaded with dynamic require to avoid deployment timeouts)
+let neo4jDriver = null;
+let neo4jModule = null;
+
+function getNeo4jModule() {
+  if (!neo4jModule) {
+    try {
+      neo4jModule = require('neo4j-driver');
+    } catch (err) {
+      console.error('Failed to load neo4j-driver:', err.message);
+      return null;
+    }
+  }
+  return neo4jModule;
+}
+
+function getNeo4jDriver() {
+  const neo4j = getNeo4jModule();
+  if (!neo4j) return null;
+
+  if (!neo4jDriver) {
+    const uri = process.env.NEO4J_URI;
+    const user = process.env.NEO4J_USER || 'neo4j';
+    const password = process.env.NEO4J_PASSWORD;
+
+    if (!uri || !password) {
+      console.error('Missing NEO4J_URI or NEO4J_PASSWORD');
+      return null;
+    }
+
+    neo4jDriver = neo4j.driver(uri, neo4j.auth.basic(user, password));
+  }
+  return neo4jDriver;
+}
+
+/**
+ * Convert natural language query to Cypher using OpenAI
+ */
+async function nlToCypher(query, client) {
+  const systemPrompt = `Eres un experto en Neo4j y Cypher. Convierte la consulta del usuario a una query Cypher valida.
+
+SCHEMA DE LA BASE DE DATOS:
+- Nodos: (:Politician {name: STRING, cluster: FLOAT, coalition: STRING})
+  - cluster: -1.0 = izquierda, 1.0 = derecha
+  - coalition: "Izquierda", "Derecha", o "Centro"
+- Relaciones: [:INTERACTED {sign: STRING, date: DATE}]
+  - sign: "positive", "negative", o "neutral"
+  - Las interacciones son direccionales (desde -> hacia)
+
+REGLAS:
+1. Siempre limita resultados con LIMIT (max 100 para nodos, 500 para relaciones)
+2. Para nombres de politicos, usa CONTAINS o =~ '(?i).*nombre.*' para busquedas flexibles
+3. Retorna datos en formato que incluya: nodes (con id, name, cluster, coalition) y links (con source, target, sign)
+4. Si la consulta es ambigua, asume que quieren ver las relaciones/interacciones
+
+EJEMPLOS:
+- "red de Boric" -> MATCH (p:Politician)-[r:INTERACTED]-(other) WHERE p.name CONTAINS 'Boric' RETURN p, r, other LIMIT 50
+- "aliados de Kast" -> MATCH (p:Politician)<-[r:INTERACTED {sign: 'positive'}]-(ally) WHERE p.name CONTAINS 'Kast' RETURN p, r, ally LIMIT 50
+- "conflictos entre izquierda y derecha" -> MATCH (a:Politician {coalition: 'Izquierda'})-[r:INTERACTED {sign: 'negative'}]->(b:Politician {coalition: 'Derecha'}) RETURN a, r, b LIMIT 100
+
+Responde SOLO con la query Cypher, sin explicaciones ni markdown.`;
+
+  const response = await client.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: query },
+    ],
+    max_tokens: 500,
+    temperature: 0.3,
+  });
+
+  return response.choices[0].message.content.trim();
+}
+
+/**
+ * Process Neo4j results into graph format for visualization
+ */
+function processGraphResults(records) {
+  const nodesMap = new Map();
+  const links = [];
+
+  records.forEach(record => {
+    record.keys.forEach(key => {
+      const value = record.get(key);
+
+      if (!value) return;
+
+      // Handle nodes
+      if (value.labels && value.properties) {
+        const node = {
+          id: value.properties.name,
+          name: value.properties.name,
+          cluster: value.properties.cluster?.toNumber?.() ?? value.properties.cluster ?? 0,
+          coalition: value.properties.coalition || 'Centro',
+        };
+        nodesMap.set(node.id, node);
+      }
+
+      // Handle relationships
+      if (value.type && value.start && value.end) {
+        // We need to find the actual node names from the record
+        const startNode = record._fields.find(f => f?.identity?.equals?.(value.start));
+        const endNode = record._fields.find(f => f?.identity?.equals?.(value.end));
+
+        if (startNode && endNode) {
+          links.push({
+            source: startNode.properties.name,
+            target: endNode.properties.name,
+            sign: value.properties.sign || 'neutral',
+            date: value.properties.date?.toString() || null,
+          });
+        }
+      }
+    });
+  });
+
+  return {
+    nodes: Array.from(nodesMap.values()),
+    links,
+  };
+}
+
+/**
+ * Query Network - Natural language to Neo4j graph query
+ */
+exports.queryNetwork = onRequest({
+  cors: true,
+  secrets: ['OPENAI_API_KEY', 'NEO4J_URI', 'NEO4J_PASSWORD'],
+  memory: '512MiB',
+  timeoutSeconds: 60,
+}, async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    const { query, cypherDirect } = req.body;
+
+    if (!query && !cypherDirect) {
+      return res.status(400).json({ error: 'Missing query parameter' });
+    }
+
+    const driver = getNeo4jDriver();
+    if (!driver) {
+      return res.status(500).json({ error: 'Neo4j not configured' });
+    }
+
+    let cypherQuery;
+
+    if (cypherDirect) {
+      // Direct Cypher query (for advanced users)
+      cypherQuery = cypherDirect;
+    } else {
+      // Convert natural language to Cypher
+      const openaiClient = getOpenAI();
+      if (!openaiClient) {
+        return res.status(500).json({ error: 'OpenAI not configured' });
+      }
+      cypherQuery = await nlToCypher(query, openaiClient);
+    }
+
+    console.log('Executing Cypher:', cypherQuery);
+
+    const session = driver.session({ database: 'neo4j' });
+    try {
+      const result = await session.run(cypherQuery);
+      const graphData = processGraphResults(result.records);
+
+      return res.json({
+        success: true,
+        query: query || '(direct cypher)',
+        cypher: cypherQuery,
+        graph: graphData,
+        stats: {
+          nodes: graphData.nodes.length,
+          links: graphData.links.length,
+        },
+      });
+    } finally {
+      await session.close();
+    }
+
+  } catch (error) {
+    console.error('Error in queryNetwork:', error);
+    return res.status(500).json({
+      error: 'Query failed',
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Get Network Stats - Basic statistics about the network
+ */
+exports.getNetworkStats = onRequest({
+  cors: true,
+  secrets: ['NEO4J_URI', 'NEO4J_PASSWORD'],
+  memory: '256MiB',
+  timeoutSeconds: 30,
+}, async (req, res) => {
+  try {
+    const driver = getNeo4jDriver();
+    if (!driver) {
+      return res.status(500).json({ error: 'Neo4j not configured' });
+    }
+
+    const session = driver.session({ database: 'neo4j' });
+    try {
+      const result = await session.run(`
+        MATCH (p:Politician)
+        WITH count(p) as totalPoliticians
+        MATCH ()-[r:INTERACTED]->()
+        WITH totalPoliticians, count(r) as totalInteractions,
+             sum(CASE WHEN r.sign = 'positive' THEN 1 ELSE 0 END) as positive,
+             sum(CASE WHEN r.sign = 'negative' THEN 1 ELSE 0 END) as negative,
+             sum(CASE WHEN r.sign = 'neutral' THEN 1 ELSE 0 END) as neutral
+        MATCH (izq:Politician {coalition: 'Izquierda'})
+        WITH totalPoliticians, totalInteractions, positive, negative, neutral, count(izq) as leftCount
+        MATCH (der:Politician {coalition: 'Derecha'})
+        RETURN totalPoliticians, totalInteractions, positive, negative, neutral, leftCount, count(der) as rightCount
+      `);
+
+      const stats = result.records[0];
+      return res.json({
+        politicians: stats.get('totalPoliticians').toNumber(),
+        interactions: stats.get('totalInteractions').toNumber(),
+        bySign: {
+          positive: stats.get('positive').toNumber(),
+          negative: stats.get('negative').toNumber(),
+          neutral: stats.get('neutral').toNumber(),
+        },
+        byCoalition: {
+          left: stats.get('leftCount').toNumber(),
+          right: stats.get('rightCount').toNumber(),
+        },
+      });
+    } finally {
+      await session.close();
+    }
+
+  } catch (error) {
+    console.error('Error in getNetworkStats:', error);
+    return res.status(500).json({ error: 'Failed to get stats' });
+  }
+});
+
+/**
+ * Get Top Politicians - Most connected politicians
+ */
+exports.getTopPoliticians = onRequest({
+  cors: true,
+  secrets: ['NEO4J_URI', 'NEO4J_PASSWORD'],
+  memory: '256MiB',
+  timeoutSeconds: 30,
+}, async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 20, 50);
+
+    const driver = getNeo4jDriver();
+    if (!driver) {
+      return res.status(500).json({ error: 'Neo4j not configured' });
+    }
+
+    const session = driver.session({ database: 'neo4j' });
+    try {
+      const result = await session.run(`
+        MATCH (p:Politician)-[r:INTERACTED]-()
+        WITH p, count(r) as connections,
+             sum(CASE WHEN r.sign = 'positive' THEN 1 ELSE 0 END) as positive,
+             sum(CASE WHEN r.sign = 'negative' THEN 1 ELSE 0 END) as negative
+        RETURN p.name as name, p.coalition as coalition, connections, positive, negative
+        ORDER BY connections DESC
+        LIMIT $limit
+      `, { limit: getNeo4jModule().int(limit) });
+
+      const politicians = result.records.map(record => ({
+        name: record.get('name'),
+        coalition: record.get('coalition'),
+        connections: record.get('connections').toNumber(),
+        positive: record.get('positive').toNumber(),
+        negative: record.get('negative').toNumber(),
+      }));
+
+      return res.json({ politicians });
+    } finally {
+      await session.close();
+    }
+
+  } catch (error) {
+    console.error('Error in getTopPoliticians:', error);
+    return res.status(500).json({ error: 'Failed to get top politicians' });
+  }
 });

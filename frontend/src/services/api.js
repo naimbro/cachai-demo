@@ -93,6 +93,51 @@ export async function healthCheck() {
   return fetchAPI('healthCheck');
 }
 
+// ============================================
+// NETWORK EXPLORER API
+// ============================================
+
+/**
+ * Query the network graph with natural language
+ * @param {string} query - Natural language query
+ * @returns {Promise<{graph: {nodes: Array, links: Array}, cypher: string, stats: Object}>}
+ */
+export async function queryNetwork(query) {
+  return fetchAPI('queryNetwork', {
+    method: 'POST',
+    body: JSON.stringify({ query }),
+  });
+}
+
+/**
+ * Execute direct Cypher query
+ * @param {string} cypher - Cypher query string
+ * @returns {Promise<{graph: {nodes: Array, links: Array}, stats: Object}>}
+ */
+export async function queryNetworkCypher(cypher) {
+  return fetchAPI('queryNetwork', {
+    method: 'POST',
+    body: JSON.stringify({ cypherDirect: cypher }),
+  });
+}
+
+/**
+ * Get network statistics
+ * @returns {Promise<{politicians: number, interactions: number, bySign: Object}>}
+ */
+export async function getNetworkStats() {
+  return fetchAPI('getNetworkStats');
+}
+
+/**
+ * Get top connected politicians
+ * @param {number} limit - Max number of results
+ * @returns {Promise<{politicians: Array}>}
+ */
+export async function getTopPoliticians(limit = 20) {
+  return fetchAPI(`getTopPoliticians?limit=${limit}`);
+}
+
 export default {
   getParlamentarios,
   getParlamentario,
@@ -100,4 +145,8 @@ export default {
   predictVote,
   searchBills,
   healthCheck,
+  queryNetwork,
+  queryNetworkCypher,
+  getNetworkStats,
+  getTopPoliticians,
 };
