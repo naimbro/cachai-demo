@@ -7,6 +7,7 @@ import DigitalTwin from './pages/DigitalTwin'
 import Predictor from './pages/Predictor'
 import Explorer from './pages/Explorer'
 import Network from './pages/Network'
+import Commissions from './pages/Commissions'
 import Login from './pages/Login'
 
 function App() {
@@ -33,7 +34,8 @@ function App() {
                   <Route path="/digital-twin" element={<DigitalTwin />} />
                   <Route path="/predictor" element={<Predictor />} />
                   <Route path="/explorer" element={<Explorer />} />
-                  <Route path="/network" element={<Network />} />
+                  {/* <Route path="/network" element={<Network />} /> */}
+                  <Route path="/commissions" element={<Commissions />} />
                 </Routes>
               </main>
               <Footer />

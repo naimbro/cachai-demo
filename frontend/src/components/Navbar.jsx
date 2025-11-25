@@ -16,6 +16,7 @@ function Navbar() {
     { path: '/predictor', label: 'Predictor' },
     { path: '/explorer', label: 'Explorer' },
     { path: '/network', label: 'Network' },
+    { path: '/commissions', label: 'Comisiones' },
   ]
 
   return (

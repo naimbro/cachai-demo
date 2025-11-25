@@ -1,0 +1,200 @@
+/**
+ * Prompt templates for commission transcript analysis features
+ */
+
+/**
+ * Quote Finder: Find exact quotes from a deputy about a topic
+ */
+function quoteFinderPrompt(deputy, topic, relevantChunks) {
+  const context = relevantChunks
+    .map(
+      (chunk, i) =>
+        `[${i + 1}] Sesión ${chunk.session} - ${chunk.speaker}:\n"${chunk.text}"`,
+    )
+    .join('\n\n');
+
+  return `Eres un asistente que analiza transcripciones del Congreso chileno.
+
+TAREA: Encuentra citas textuales de ${deputy} sobre "${topic}".
+
+CONTEXTO (intervenciones relevantes):
+${context}
+
+INSTRUCCIONES:
+1. Busca SOLO intervenciones de ${deputy}
+2. Selecciona las citas más relevantes sobre "${topic}"
+3. Incluye contexto breve de cada cita
+4. Si no hay citas directas, indica que el diputado no habló sobre el tema
+
+FORMATO DE RESPUESTA (JSON):
+{
+  "found": true/false,
+  "quotes": [
+    {
+      "text": "cita textual exacta",
+      "session": "número de sesión",
+      "context": "breve contexto de la intervención",
+      "relevance": "por qué esta cita es relevante"
+    }
+  ],
+  "summary": "resumen general de la posición del diputado"
+}`;
+}
+
+/**
+ * Posicionómetro: Determine a deputy's position on a topic
+ */
+function posicionometroPrompt(deputy, topic, relevantChunks) {
+  const context = relevantChunks
+    .map(
+      (chunk, i) =>
+        `[${i + 1}] Sesión ${chunk.session} - ${chunk.speaker}:\n"${chunk.text}"`,
+    )
+    .join('\n\n');
+
+  return `Eres un analista político que estudia las posiciones de diputados chilenos.
+
+TAREA: Determina la posición de ${deputy} sobre "${topic}".
+
+CONTEXTO (intervenciones relevantes):
+${context}
+
+INSTRUCCIONES:
+1. Analiza SOLO las intervenciones de ${deputy}
+2. Clasifica su posición: A FAVOR / EN CONTRA / NEUTRO / NO SE PRONUNCIÓ
+3. Identifica argumentos principales que usa
+4. Extrae una cita clave que resuma su postura
+5. Evalúa el nivel de convicción (débil/moderado/fuerte)
+
+FORMATO DE RESPUESTA (JSON):
+{
+  "deputy": "${deputy}",
+  "topic": "${topic}",
+  "position": "A FAVOR" | "EN CONTRA" | "NEUTRO" | "NO SE PRONUNCIÓ",
+  "conviction_level": "débil" | "moderado" | "fuerte",
+  "main_arguments": [
+    "argumento 1",
+    "argumento 2",
+    "argumento 3"
+  ],
+  "key_quote": "cita textual que resume su postura",
+  "session": "sesión donde se pronunció",
+  "nuance": "matices o condiciones que expresa"
+}`;
+}
+
+/**
+ * Smart Briefing: Executive summary of a session
+ */
+function smartBriefingPrompt(sessionNumber, allChunks) {
+  const context = allChunks
+    .map(
+      (chunk, i) =>
+        `[${i + 1}] ${chunk.speaker}:\n"${chunk.text.substring(0, 500)}${chunk.text.length > 500 ? '...' : ''}"`,
+    )
+    .join('\n\n');
+
+  return `Eres un analista político que resume sesiones del Congreso chileno.
+
+TAREA: Genera un Smart Briefing de la Sesión ${sessionNumber}.
+
+CONTEXTO (transcripción completa de la sesión):
+${context}
+
+INSTRUCCIONES:
+1. Identifica el tema central o proyecto de ley discutido
+2. Detecta las posiciones: ¿quiénes están a favor y quiénes en contra?
+3. Resume los argumentos principales de cada lado
+4. Identifica diputados clave (quienes más hablaron o con intervenciones importantes)
+5. Detecta momentos de tensión, debate o votaciones
+6. Resume el resultado si hubo votación
+
+FORMATO DE RESPUESTA (JSON):
+{
+  "session": "${sessionNumber}",
+  "date": "si se menciona en la transcripción",
+  "main_topic": "tema principal discutido",
+  "project_id": "boletín si se menciona",
+  "key_deputies": ["diputado1", "diputado2", "diputado3"],
+  "positions": {
+    "a_favor": [
+      {
+        "deputy": "nombre",
+        "main_argument": "argumento principal"
+      }
+    ],
+    "en_contra": [
+      {
+        "deputy": "nombre",
+        "main_argument": "argumento principal"
+      }
+    ]
+  },
+  "key_moments": [
+    "momento 1 (ej: votación sobre artículo 5)",
+    "momento 2"
+  ],
+  "outcome": "resultado de la sesión si aplica",
+  "executive_summary": "resumen ejecutivo de 2-3 oraciones"
+}`;
+}
+
+/**
+ * Comparison: Compare arguments for/against a topic
+ */
+function comparisonPrompt(topic, relevantChunks) {
+  const context = relevantChunks
+    .map(
+      (chunk, i) =>
+        `[${i + 1}] Sesión ${chunk.session} - ${chunk.speaker}:\n"${chunk.text}"`,
+    )
+    .join('\n\n');
+
+  return `Eres un analista que compara argumentos en debates del Congreso chileno.
+
+TAREA: Compara los argumentos A FAVOR vs EN CONTRA sobre "${topic}".
+
+CONTEXTO (intervenciones relevantes):
+${context}
+
+INSTRUCCIONES:
+1. Identifica quiénes están a favor y quiénes en contra
+2. Agrupa los argumentos por tema/categoría
+3. Presenta ambos lados de forma equilibrada
+4. Incluye citas representativas de cada posición
+
+FORMATO DE RESPUESTA (JSON):
+{
+  "topic": "${topic}",
+  "a_favor": {
+    "deputies": ["nombre1", "nombre2"],
+    "arguments": [
+      {
+        "category": "económico/social/ambiental/etc",
+        "argument": "descripción del argumento",
+        "quote": "cita textual representativa",
+        "deputy": "quien lo dijo"
+      }
+    ]
+  },
+  "en_contra": {
+    "deputies": ["nombre3", "nombre4"],
+    "arguments": [
+      {
+        "category": "económico/social/ambiental/etc",
+        "argument": "descripción del argumento",
+        "quote": "cita textual representativa",
+        "deputy": "quien lo dijo"
+      }
+    ]
+  },
+  "synthesis": "síntesis del debate - puntos comunes y divergencias principales"
+}`;
+}
+
+module.exports = {
+  quoteFinderPrompt,
+  posicionometroPrompt,
+  smartBriefingPrompt,
+  comparisonPrompt,
+};
