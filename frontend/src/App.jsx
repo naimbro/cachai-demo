@@ -31,9 +31,9 @@ function App() {
               <main className="flex-grow pt-24 sm:pt-32 md:pt-44">
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/digital-twin" element={<DigitalTwin />} />
+                  {/* <Route path="/digital-twin" element={<DigitalTwin />} /> */}
                   <Route path="/predictor" element={<Predictor />} />
-                  <Route path="/explorer" element={<Explorer />} />
+                  {/* <Route path="/explorer" element={<Explorer />} /> */}
                   <Route path="/network" element={<Network />} />
                   <Route path="/commissions" element={<Commissions />} />
                 </Routes>

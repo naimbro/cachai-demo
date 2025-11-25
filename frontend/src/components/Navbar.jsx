@@ -12,9 +12,7 @@ function Navbar() {
 
   const navLinks = [
     { path: '/', label: 'Inicio' },
-    { path: '/digital-twin', label: 'Digital Twin' },
     { path: '/predictor', label: 'Predictor' },
-    { path: '/explorer', label: 'Explorer' },
     { path: '/network', label: 'Network' },
     { path: '/commissions', label: 'Comisiones' },
   ]
