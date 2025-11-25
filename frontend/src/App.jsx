@@ -34,7 +34,7 @@ function App() {
                   <Route path="/digital-twin" element={<DigitalTwin />} />
                   <Route path="/predictor" element={<Predictor />} />
                   <Route path="/explorer" element={<Explorer />} />
-                  {/* <Route path="/network" element={<Network />} /> */}
+                  <Route path="/network" element={<Network />} />
                   <Route path="/commissions" element={<Commissions />} />
                 </Routes>
               </main>

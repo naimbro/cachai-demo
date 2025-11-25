@@ -108,7 +108,7 @@ function parseIntent(query) {
   }
 
   // Pattern 2: Position - "posición de X sobre Y" or "qué piensa X sobre Y"
-  const positionMatch = lowerQuery.match(/(?:cu[áa]l es (?:la )?posici[óo]n|posici[óo]n|qu[ée] piensa|piensa|opina|postura|qu[ée] opina)\s+(?:de\s+)?([^sobre]+?)\s+sobre\s+(.+)/i);
+  const positionMatch = lowerQuery.match(/(?:cu[áa]l es (?:la )?posici[óo]n|posici[óo]n|qu[ée] piensa|piensa|opina|postura|qu[ée] opina)\s+(?:de\s+)?(.+?)\s+sobre\s+(.+)/i);
   if (positionMatch) {
     const deputyRaw = positionMatch[1].trim();
     const topic = positionMatch[2].trim();
@@ -128,7 +128,7 @@ function parseIntent(query) {
   }
 
   // Pattern 3: Quote Finder - "citas de X sobre Y" or "qué dijo X sobre Y"
-  const quoteMatch = lowerQuery.match(/(?:citas?|dijo|mencion[óo]|habl[óo])\s+(?:de\s+)?([^sobre]+?)\s+sobre\s+(.+)/i);
+  const quoteMatch = lowerQuery.match(/(?:citas?|dijo|mencion[óo]|habl[óo])\s+(?:de\s+)?(.+?)\s+sobre\s+(.+)/i);
   if (quoteMatch) {
     const deputyRaw = quoteMatch[1].trim();
     const topic = quoteMatch[2].trim();

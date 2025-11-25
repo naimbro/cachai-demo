@@ -1,0 +1,37 @@
+# Ignore development files
+.git
+.gitignore
+node_modules/
+
+# Ignore backup and old files
+*.backup
+*.old
+
+# Ignore test files
+test/
+tests/
+*.test.js
+*.spec.js
+
+# Ignore documentation
+*.md
+README.md
+
+# Ignore environment files (already in .gitignore but good to exclude)
+.env.local
+.env.development
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore logs
+*.log
+npm-debug.log*
+
+# Ignore OS files
+.DS_Store
+Thumbs.db

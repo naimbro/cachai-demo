@@ -825,3 +825,194 @@ exports.getTopPoliticians = onRequest({
     return res.status(500).json({ error: 'Failed to get top politicians' });
   }
 });
+
+// ========================================
+// Commission Transcript Analysis (Deterministic)
+// ========================================
+
+let commissionTranscripts;
+const intentParser = require('./transcripts/intentParser');
+const deterministicSearch = require('./transcripts/deterministicSearch');
+const narrativePrompts = require('./transcripts/narrativePrompts');
+
+function loadCommissionTranscripts() {
+  if (!commissionTranscripts) {
+    // Use light version without embeddings (deterministic approach doesn't need them)
+    commissionTranscripts = require('./parliamentdata/commission_transcripts_light.json');
+  }
+  return commissionTranscripts;
+}
+
+/**
+ * Main Cloud Function for commission transcript analysis (Deterministic approach)
+ */
+exports.analyzeCommissionTranscripts = onRequest({
+  cors: true,
+  secrets: ['OPENAI_API_KEY'],
+  memory: '512MiB',
+  timeoutSeconds: 60,
+}, async (req, res) => {
+  try {
+    const { query } = req.body;
+
+    if (!query) {
+      return res.status(400).json({ error: 'Query is required' });
+    }
+
+    console.log('📋 Analyzing query:', query);
+
+    // STEP 1: Parse intent (deterministic)
+    const intent = intentParser.parseIntent(query);
+    console.log('🔍 Parsed intent:', JSON.stringify(intent, null, 2));
+
+    // Load transcript data (light version without embeddings)
+    const data = loadCommissionTranscripts();
+    const chunks = data.chunks;
+
+    // STEP 2: Deterministic search based on filters
+    const searchResults = deterministicSearch.searchChunks(chunks, intent.filters);
+    console.log(`📄 Found ${searchResults.length} matching chunks`);
+
+    // STEP 3: Build structured data (no LLM yet)
+    let structuredData;
+
+    switch (intent.type) {
+    case 'position':
+      structuredData = deterministicSearch.buildPositionData(intent, searchResults);
+      break;
+
+    case 'quote':
+      structuredData = deterministicSearch.buildQuoteData(intent, searchResults);
+      break;
+
+    case 'briefing': {
+      const sessionChunks = deterministicSearch.getSessionChunks(chunks, intent.session);
+      structuredData = deterministicSearch.buildBriefingData(intent, sessionChunks);
+      break;
+    }
+
+    case 'comparison':
+      structuredData = deterministicSearch.buildComparisonData(intent, searchResults);
+      break;
+
+    case 'search':
+    case 'session_search':
+    default:
+      // Return raw results for generic search
+      return res.json({
+        feature: intent.type,
+        query,
+        intent,
+        chunks: searchResults.slice(0, 10).map(c => ({
+          speaker: c.speaker,
+          session: c.session,
+          text: c.text,
+          index: c.index,
+        })),
+        metadata: {
+          total_results: searchResults.length,
+          method: 'deterministic_filter',
+        },
+      });
+    }
+
+    // Check if data was found
+    if (!structuredData.found) {
+      return res.json({
+        feature: intent.type,
+        query,
+        intent,
+        response: structuredData,
+        metadata: {
+          method: 'deterministic_filter',
+          chunks_found: 0,
+        },
+      });
+    }
+
+    console.log('📊 Structured data built:', Object.keys(structuredData));
+
+    // STEP 4: LLM formats structured data into narrative (optional)
+    const client = getOpenAI();
+    if (!client) {
+      // Return structured data without narrative formatting
+      return res.json({
+        feature: intent.type,
+        query,
+        intent,
+        response: structuredData,
+        metadata: {
+          method: 'deterministic_filter',
+          chunks_analyzed: searchResults.length,
+          llm_used: false,
+        },
+      });
+    }
+
+    // Generate narrative prompt based on type
+    let narrativePrompt;
+    switch (intent.type) {
+    case 'position':
+      narrativePrompt = narrativePrompts.positionNarrativePrompt(structuredData);
+      break;
+    case 'quote':
+      narrativePrompt = narrativePrompts.quoteNarrativePrompt(structuredData);
+      break;
+    case 'briefing':
+      narrativePrompt = narrativePrompts.briefingNarrativePrompt(structuredData);
+      break;
+    case 'comparison':
+      narrativePrompt = narrativePrompts.comparisonNarrativePrompt(structuredData);
+      break;
+    default:
+      // No narrative needed
+      return res.json({
+        feature: intent.type,
+        query,
+        intent,
+        response: structuredData,
+        metadata: {
+          method: 'deterministic_filter',
+          chunks_analyzed: searchResults.length,
+        },
+      });
+    }
+
+    // Call LLM to format narrative
+    console.log('🤖 Calling LLM for narrative formatting...');
+    const completion = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'user', content: narrativePrompt },
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0.2, // Low temperature for consistent formatting
+    });
+
+    const narrative = JSON.parse(completion.choices[0].message.content);
+
+    console.log('✅ Analysis complete');
+
+    return res.json({
+      feature: intent.type,
+      query,
+      intent,
+      structured_data: structuredData, // Include raw data for transparency
+      response: narrative, // Formatted narrative
+      metadata: {
+        method: 'deterministic_filter',
+        chunks_analyzed: searchResults.length,
+        llm_used: true,
+        model: 'gpt-4o-mini',
+      },
+    });
+
+  } catch (error) {
+    console.error('❌ Error in analyzeCommissionTranscripts:', error);
+    return res.status(500).json({
+      error: 'Failed to analyze transcripts',
+      details: error.message,
+      stack: error.stack,
+    });
+  }
+});
