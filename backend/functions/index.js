@@ -569,27 +569,109 @@ function getNeo4jDriver() {
 /**
  * Convert natural language query to Cypher using OpenAI
  */
-async function nlToCypher(query, client) {
-  const systemPrompt = `Eres un experto en Neo4j y Cypher. Convierte la consulta del usuario a una query Cypher valida.
+async function nlToCypher(query, client, isMobile = false) {
+  const maxNodes = isMobile ? 12 : 30;
+  const maxNeighbors = isMobile ? 8 : 15;
+  const maxLinks = isMobile ? 15 : 30;
+
+  const systemPrompt = `Eres un experto en Neo4j, Cypher y visualización de redes políticas. Convierte la consulta del usuario a una query Cypher válida que genere redes ÚTILES Y COMPLETAS para visualización.
 
 SCHEMA DE LA BASE DE DATOS:
 - Nodos: (:Politician {name: STRING, cluster: FLOAT, coalition: STRING})
-  - cluster: -1.0 = izquierda, 1.0 = derecha
+  - cluster: -1.0 = izquierda extrema, 0 = centro, 1.0 = derecha extrema
   - coalition: "Izquierda", "Derecha", o "Centro"
-- Relaciones: [:INTERACTED {sign: STRING, date: DATE}]
+- Relaciones: [:INTERACTED {sign: STRING, date: DATE, title: STRING, body: STRING}]
   - sign: "positive", "negative", o "neutral"
-  - Las interacciones son direccionales (desde -> hacia)
+  - title: Título del artículo que menciona la interacción
+  - body: Cuerpo/texto del artículo
+  - Las interacciones son DIRECCIONALES (desde -> hacia)
+  - PUEDES BUSCAR EN title Y body PARA FILTRAR INTERACCIONES POR TEMAS
 
-REGLAS:
-1. Siempre limita resultados con LIMIT (max 100 para nodos, 500 para relaciones)
-2. Para nombres de politicos, usa CONTAINS o =~ '(?i).*nombre.*' para busquedas flexibles
-3. Retorna datos en formato que incluya: nodes (con id, name, cluster, coalition) y links (con source, target, sign)
-4. Si la consulta es ambigua, asume que quieren ver las relaciones/interacciones
+PRINCIPIOS DE VISUALIZACIÓN DE REDES:
+1. **LÍMITE ESTRICTO**: ${isMobile ? `MÓVIL - MÁXIMO ${maxNodes} nodos total` : `DESKTOP - MÁXIMO ${maxNodes} nodos total`}. La red debe ser legible.
+2. **Completitud selectiva**: Para "red de X", incluye solo los vecinos MÁS RELEVANTES
+3. **Densidad balanceada**: ${isMobile ? '8-12' : '15-30'} nodos ideal. Evita sobrecarga visual
+4. **Links entre vecinos**: SIEMPRE incluye relaciones entre los nodos vecinos, no solo con el nodo central
 
-EJEMPLOS:
-- "red de Boric" -> MATCH (p:Politician)-[r:INTERACTED]-(other) WHERE p.name CONTAINS 'Boric' RETURN p, r, other LIMIT 50
-- "aliados de Kast" -> MATCH (p:Politician)<-[r:INTERACTED {sign: 'positive'}]-(ally) WHERE p.name CONTAINS 'Kast' RETURN p, r, ally LIMIT 50
-- "conflictos entre izquierda y derecha" -> MATCH (a:Politician {coalition: 'Izquierda'})-[r:INTERACTED {sign: 'negative'}]->(b:Politician {coalition: 'Derecha'}) RETURN a, r, b LIMIT 100
+REGLAS TÉCNICAS:
+1. LIMITA vecinos de 1er grado a ${maxNeighbors} nodos máximo
+2. Para búsquedas por nombre, usa: p.name =~ '(?i).*keyword.*' (case-insensitive)
+3. LIMITA apropiadamente: ${maxNodes} nodos y ${maxLinks} relaciones máximo
+4. SIEMPRE retorna: p, r, other (o equivalente) para que processGraphResults funcione
+5. Usa DISTINCT para evitar duplicados en paths largos
+
+PATRONES RECOMENDADOS:
+
+A) "Red de X" (vecinos + links entre ellos - LIMITADO a ${maxNeighbors} vecinos y ${maxLinks} links):
+// IMPORTANTE: Para Gabriel Boric, usa SIEMPRE el nombre EXACTO "Gabriel Boric" (no Font, no Presidente)
+MATCH (center:Politician {name: 'Gabriel Boric'})
+MATCH (center)-[r1:INTERACTED]-(n1:Politician)
+WITH center, collect(DISTINCT n1) as neighbors
+WITH center, neighbors[0..${maxNeighbors}] as limitedNeighbors
+UNWIND limitedNeighbors as n1
+MATCH (center)-[r1:INTERACTED]-(n1)
+RETURN center as p, r1 as r, n1 as other
+UNION
+MATCH (center:Politician {name: 'Gabriel Boric'})
+MATCH (center)-[r1:INTERACTED]-(n1:Politician)
+WITH center, collect(DISTINCT n1) as neighbors
+WITH center, neighbors[0..${maxNeighbors}] as limitedNeighbors
+UNWIND limitedNeighbors as n1
+UNWIND limitedNeighbors as n2
+WITH n1, n2
+WHERE id(n1) < id(n2)
+MATCH (n1)-[r2:INTERACTED]-(n2)
+RETURN n1 as p, r2 as r, n2 as other
+LIMIT ${maxLinks}
+
+B) "Aliados de X" (relaciones positivas - LIMITADO):
+MATCH (p:Politician)-[r:INTERACTED]-(ally:Politician)
+WHERE p.name =~ '(?i).*Kast.*' AND r.sign = 'positive'
+WITH p, r, ally
+ORDER BY r.date DESC
+LIMIT 40
+RETURN p, r, ally as other
+
+C) "Conflictos entre grupos" (LIMITADO):
+MATCH (a:Politician)-[r:INTERACTED]->(b:Politician)
+WHERE a.coalition = 'Izquierda' AND b.coalition = 'Derecha' AND r.sign = 'negative'
+WITH a, r, b
+ORDER BY r.date DESC
+LIMIT 40
+RETURN a as p, r, b as other
+
+D) "Red del partido X" (LIMITADO a nodos más conectados):
+MATCH (p:Politician)-[r:INTERACTED]-(other:Politician)
+WHERE p.coalition = 'Izquierda' AND other.coalition IN ['Izquierda', 'Centro']
+WITH p, r, other, count(r) as connections
+ORDER BY connections DESC
+LIMIT 40
+RETURN p, r, other
+
+E) "Relación entre X e Y" (camino más corto - LIMITADO):
+MATCH path = shortestPath((a:Politician)-[:INTERACTED*..3]-(b:Politician))
+WHERE a.name =~ '(?i).*persona1.*' AND b.name =~ '(?i).*persona2.*'
+WITH path, relationships(path) as rels, nodes(path) as nds
+UNWIND range(0, size(rels)-1) as i
+RETURN nds[i] as p, rels[i] as r, nds[i+1] as other
+
+F) "Interacciones sobre tema X" (buscar en title/body - LIMITADO):
+MATCH (a:Politician)-[r:INTERACTED]->(b:Politician)
+WHERE r.title =~ '(?i).*reforma tributaria.*' OR r.body =~ '(?i).*reforma tributaria.*'
+WITH a, r, b
+ORDER BY r.date DESC
+LIMIT 40
+RETURN a as p, r, b as other
+
+INSTRUCCIONES CRÍTICAS:
+1. **GABRIEL BORIC**: Cuando busquen "red de Boric", "Gabriel Boric", o variantes, usa SIEMPRE match exacto: {name: 'Gabriel Boric'} - NO uses regex, NO captures "Presidente Boric" ni "Gabriel Boric Font"
+2. **SIEMPRE LIMITA A MÁXIMO ${maxNodes} NODOS** - Usa LIMIT apropiadamente en cada query
+3. **Prioriza calidad sobre cantidad** - Ordena por fecha DESC o relevancia antes de limitar
+4. **Para queries de "red de X"**: Sigue el patrón A) exactamente
+5. **NUNCA generes queries que puedan retornar >50 nodos** - La visualización se rompe
+6. NO generes queries que devuelvan <10 nodos (serán visualizaciones pobres)
+7. Prefiere DISTINCT para evitar duplicados en paths
+8. Si la query es ambigua, asume que quieren una red expansiva pero LIMITADA
 
 Responde SOLO con la query Cypher, sin explicaciones ni markdown.`;
 
@@ -599,8 +681,8 @@ Responde SOLO con la query Cypher, sin explicaciones ni markdown.`;
       { role: 'system', content: systemPrompt },
       { role: 'user', content: query },
     ],
-    max_tokens: 500,
-    temperature: 0.3,
+    max_tokens: 600,
+    temperature: 0.2,
   });
 
   return response.choices[0].message.content.trim();
@@ -668,11 +750,15 @@ exports.queryNetwork = onRequest({
   }
 
   try {
-    const { query, cypherDirect } = req.body;
+    const { query, cypherDirect, deviceType } = req.body;
 
     if (!query && !cypherDirect) {
       return res.status(400).json({ error: 'Missing query parameter' });
     }
+
+    // Detect mobile device
+    const userAgent = req.headers['user-agent'] || '';
+    const isMobile = deviceType === 'mobile' || /mobile|android|iphone|ipad|ipod/i.test(userAgent);
 
     const driver = getNeo4jDriver();
     if (!driver) {
@@ -690,7 +776,7 @@ exports.queryNetwork = onRequest({
       if (!openaiClient) {
         return res.status(500).json({ error: 'OpenAI not configured' });
       }
-      cypherQuery = await nlToCypher(query, openaiClient);
+      cypherQuery = await nlToCypher(query, openaiClient, isMobile);
     }
 
     console.log('Executing Cypher:', cypherQuery);
@@ -700,11 +786,46 @@ exports.queryNetwork = onRequest({
       const result = await session.run(cypherQuery);
       const graphData = processGraphResults(result.records);
 
+      // Mark focus node for visualization
+      let focusPerson = null;
+      if (query) {
+        // Extract politician name from query
+        const queryLower = query.toLowerCase();
+
+        // Try to match common patterns
+        if (queryLower.includes('boric')) {
+          focusPerson = 'Gabriel Boric';
+        } else {
+          // Try to find any politician name mentioned in the query
+          const matchedNode = graphData.nodes.find(node =>
+            queryLower.includes(node.name.toLowerCase().split(' ')[0]) ||
+            queryLower.includes(node.name.toLowerCase().split(' ').pop())
+          );
+          if (matchedNode) {
+            focusPerson = matchedNode.name;
+          }
+        }
+
+        // Mark the focus node
+        if (focusPerson) {
+          const targetNode = graphData.nodes.find(n => n.name === focusPerson);
+          if (targetNode) {
+            targetNode.isFocus = true;
+          }
+        }
+      }
+
+      // Generate narrative analysis
+      const openaiClient = getOpenAI();
+      const narrative = await generateNetworkNarrative(graphData, query || '(direct cypher)', openaiClient);
+
       return res.json({
         success: true,
         query: query || '(direct cypher)',
         cypher: cypherQuery,
         graph: graphData,
+        narrative: narrative,
+        intent: focusPerson ? { person: focusPerson } : null,
         stats: {
           nodes: graphData.nodes.length,
           links: graphData.links.length,
